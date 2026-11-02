@@ -1183,7 +1183,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(ev.origin!==ORIGIN||ev.source!==window.parent||!ev.data||ev.data.type!=='scoutpro-report:fill-external-bruto'||ev.data.module!=='scoutpro')return;
   const payload=ev.data.payload||{};
   const incoming=payload.player&&payload.player.nombre||payload.record&&payload.record.jugador||'el jugador';
-  if(v('nombre')&&v('nombre')!==incoming&&!window.confirm('El Informe Bruto tiene datos cargados. ¿Reemplazarlos con el informe de '+incoming+'?'))return;
+  const hasExisting=['nombre','club','obs-tec','obs-tac','obs-fis','obs-psi','notas'].some(id=>v(id).trim());if(hasExisting&&!window.confirm('El Informe Bruto tiene datos cargados. ¿Reemplazarlos con el informe de '+incoming+'?'))return;
   apply(payload);
  });
  if(window.parent!==window)window.parent.postMessage({type:'scoutpro-report:external-bruto-ready'},ORIGIN);
