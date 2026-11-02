@@ -1146,5 +1146,49 @@ window.addEventListener('DOMContentLoaded',()=>{
   toast('✅ Informe cargado — datos guardados automáticamente','info','💾');
 });
 </script>
+
+<script id="scoutpro-generator-bridge">
+(function(){
+ const ORIGIN='https://fb-scouting.github.io';
+ function setField(id,value){const el=document.getElementById(id);if(!el||value===undefined||value===null||value==='')return;el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}
+ function setImage(imgId,placeholderId,src,overlayId){
+  if(!src)return;const img=document.getElementById(imgId),ph=document.getElementById(placeholderId);
+  if(!img)return;img.src=src;img.style.display='block';if(ph)ph.style.display='none';
+  if(overlayId){const ov=document.getElementById(overlayId);if(ov)ov.style.display='block'}
+ }
+ function apply(payload){
+  const p=payload.player||{},r=payload.record||{},perfil=r.perfil||{},conclusion=r.conclusion||{};
+  setField('nombre',p.nombre||r.jugador);
+  setField('club',p.club);
+  setField('fnac',p.fnac);
+  setField('edad',p.edad);
+  setField('nac',p.nacionalidad);
+  setField('pie',p.pie);
+  setField('altura',p.altura?String(p.altura):'');
+  const pos=document.getElementById('posicion');
+  if(pos&&p.posicion){const match=Array.from(pos.options).find(o=>o.value===p.posicion||o.textContent===p.posicion);if(match)pos.value=match.value}
+  setField('obs-tec',perfil.tecnico);
+  setField('obs-tac',perfil.tactico);
+  setField('obs-fis',perfil.fisico);
+  setField('obs-psi',perfil.psicologico);
+  const parts=[['FORTALEZAS',conclusion.fortalezas],['DEBILIDADES',conclusion.debilidades],['ASPECTOS A MEJORAR',conclusion.mejorar]].filter(x=>x[1]).map(x=>x[0]+': '+x[1]);
+  if(parts.length)setField('notas',parts.join('\n\n'));
+  setImage('prev-foto','ph-foto',p.foto,'ov-foto');
+  setImage('prev-escudo','ph-escudo',p.escudo);
+  if(typeof autoSave==='function')autoSave();
+  if(typeof updateStats==='function')updateStats();
+  toast('Datos recibidos desde SCOUTPRO · Revisá y guardá el informe','info','↗');
+ }
+ window.addEventListener('message',ev=>{
+  if(ev.origin!==ORIGIN||ev.source!==window.parent||!ev.data||ev.data.type!=='scoutpro-report:fill-external-bruto'||ev.data.module!=='scoutpro')return;
+  const payload=ev.data.payload||{};
+  const incoming=payload.player&&payload.player.nombre||payload.record&&payload.record.jugador||'el jugador';
+  if(v('nombre')&&v('nombre')!==incoming&&!window.confirm('El Informe Bruto tiene datos cargados. ¿Reemplazarlos con el informe de '+incoming+'?'))return;
+  apply(payload);
+ });
+ if(window.parent!==window)window.parent.postMessage({type:'scoutpro-report:external-bruto-ready'},ORIGIN);
+})();
+</script>
+
 </body>
 </html>
