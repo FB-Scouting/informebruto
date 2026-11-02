@@ -110,6 +110,19 @@ body{
 }
 .config-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 
+/* ═══ IDENTIDAD INSTITUCIONAL ═══ */
+.branding-panel{background:rgba(0,194,255,.035);border:1px solid var(--bdr2);border-radius:10px;padding:20px;margin-bottom:20px}
+.branding-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.branding-panel input[type=color]{width:100%;height:42px;padding:4px;background:var(--inp);border:1px solid var(--bdr);border-radius:5px;cursor:pointer}
+.branding-panel input[type=url]{background:var(--inp);border:1px solid var(--bdr);border-radius:5px;color:var(--txt);font:14px 'Barlow',sans-serif;padding:9px 13px;width:100%;min-width:0}
+.branding-panel input[type=range]{width:100%;accent-color:var(--acc);cursor:pointer}
+.branding-upload{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.branding-upload .btn{font-size:11px;padding:8px 12px}
+.branding-preview{max-width:100%;max-height:82px;object-fit:contain;border:1px solid var(--bdr);border-radius:6px;padding:5px;background:rgba(0,0,0,.18);display:none}
+.branding-note{font-size:11px;color:var(--txt3);line-height:1.5}
+#reportContent{position:relative;isolation:isolate}
+#reportContent>.report-background{position:absolute;inset:0;z-index:-1;pointer-events:none;background-position:center top;background-size:cover;background-repeat:no-repeat;opacity:.55}
+@media(max-width:680px){.branding-grid{grid-template-columns:1fr}}
 /* ═══ LOGOS ═══ */
 .logos-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .logo-box{
@@ -375,6 +388,17 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
 </header>
 
 <div class="wrap" id="reportContent">
+
+<div class="sec-title">⓪ Configuración Institucional</div>
+<div class="branding-panel" id="brandingPanel"><div class="branding-grid">
+<div class="fg"><label>Nombre de la organización</label><input type="text" id="brand-org-name" placeholder="Nombre del club, agencia o empresa"></div>
+<div class="fg"><label>Tipo de organización</label><select id="brand-org-type"><option value="">Seleccionar…</option><option value="club">Club</option><option value="agencia">Agencia</option><option value="empresa">Empresa</option></select></div>
+<div class="fg"><label>Color principal</label><input type="color" id="brand-primary" value="#00c2ff"><span class="branding-note" id="brand-primary-code">#00C2FF</span></div>
+<div class="fg"><label>Color secundario</label><input type="color" id="brand-secondary" value="#ff6b00"><span class="branding-note" id="brand-secondary-code">#FF6B00</span></div>
+<div class="fg"><label>Escudo / Logo · URL</label><input type="url" id="brand-logo-url" placeholder="https://…"><div class="branding-upload"><button type="button" class="btn btn-acc" onclick="document.getElementById('brand-logo-file').click()">Elegir archivo</button><input type="file" id="brand-logo-file" accept="image/*" hidden><img id="brand-logo-preview" class="branding-preview" alt="Vista previa del logo"></div></div>
+<div class="fg"><label>Fondo institucional · URL</label><input type="url" id="brand-bg-url" placeholder="https://…"><div class="branding-upload"><button type="button" class="btn btn-acc" onclick="document.getElementById('brand-bg-file').click()">Elegir archivo</button><input type="file" id="brand-bg-file" accept="image/*" hidden><img id="brand-bg-preview" class="branding-preview" alt="Vista previa del fondo"></div></div>
+<div class="fg" style="grid-column:1/-1"><label>Intensidad del fondo: <strong id="brand-bg-value">55%</strong></label><input type="range" id="brand-bg-opacity" min="0" max="100" value="55"><span class="branding-note">Regula la opacidad de la imagen institucional detrás del contenido del informe.</span></div>
+</div></div>
 
 <!-- ══ LOGOS ══ -->
 <div class="sec-title">① Identidad del Informe</div>
@@ -1190,5 +1214,30 @@ window.addEventListener('DOMContentLoaded',()=>{
 })();
 </script>
 
+<script id="institutional-branding">
+(function(){
+ const KEY='scout_report_branding_v1',ids=['brand-org-name','brand-org-type','brand-primary','brand-secondary','brand-logo-url','brand-bg-url','brand-bg-opacity'];
+ const $=id=>document.getElementById(id);let logoData='',backgroundData='';
+ function validUrl(s){try{return ['http:','https:'].includes(new URL(s).protocol)}catch(e){return false}}
+ function apply(){
+  const primary=$('brand-primary').value,secondary=$('brand-secondary').value,opacity=Number($('brand-bg-opacity').value)/100;
+  document.documentElement.style.setProperty('--acc',primary);document.documentElement.style.setProperty('--acc2',secondary);
+  $('brand-primary-code').textContent=primary.toUpperCase();$('brand-secondary-code').textContent=secondary.toUpperCase();$('brand-bg-value').textContent=Math.round(opacity*100)+'%';
+  const bg=backgroundData||(validUrl($('brand-bg-url').value)?$('brand-bg-url').value:'');const layer=$('report-background-layer');
+  if(layer){layer.style.backgroundImage=bg?'url("'+bg.replace(/["\\]/g,'')+'")':'none';layer.style.opacity=String(opacity)}
+  const logo=logoData||(validUrl($('brand-logo-url').value)?$('brand-logo-url').value:'');
+  [['brand-logo-preview',logo],['brand-bg-preview',bg]].forEach(([id,src])=>{const el=$(id);if(src){el.src=src;el.style.display='block'}else{el.removeAttribute('src');el.style.display='none'}});
+ }
+ function save(){const d={};ids.forEach(id=>d[id]=$(id).value);d.logoData=logoData;d.backgroundData=backgroundData;try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){toast('La imagen supera el espacio disponible del navegador. Probá con una imagen más liviana.','err','⚠️')}apply()}
+ function compress(file,max,quality){return new Promise((resolve,reject)=>{const rd=new FileReader();rd.onerror=reject;rd.onload=()=>{const im=new Image();im.onerror=reject;im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',quality))};im.src=rd.result};rd.readAsDataURL(file)})}
+ ids.forEach(id=>$(id).addEventListener('input',save));
+ $('brand-logo-file').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{logoData=await compress(f,800,.82);$('brand-logo-url').value='';save()}catch(_){toast('No se pudo cargar el logo.','err','⚠️')}});
+ $('brand-bg-file').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{backgroundData=await compress(f,1800,.78);$('brand-bg-url').value='';save()}catch(_){toast('No se pudo cargar el fondo.','err','⚠️')}});
+ $('brand-logo-url').addEventListener('change',()=>{logoData='';save()});$('brand-bg-url').addEventListener('change',()=>{backgroundData='';save()});
+ const layer=document.createElement('div');layer.className='report-background';layer.id='report-background-layer';$('reportContent').prepend(layer);
+ function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'{}');ids.forEach(id=>{if(d[id]!==undefined)$(id).value=d[id]});logoData=d.logoData||'';backgroundData=d.backgroundData||''}catch(_){}apply()}
+ if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',load);else load();
+})();
+</script>
 </body>
 </html>
