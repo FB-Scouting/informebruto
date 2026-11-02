@@ -387,9 +387,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
   </div>
 </header>
 
-<div class="wrap" id="reportContent">
-
-<div class="sec-title">⓪ Configuración Institucional</div>
+<div class="wrap" id="brandingConfig"><div class="sec-title">Configuración Institucional</div>
 <div class="branding-panel" id="brandingPanel"><div class="branding-grid">
 <div class="fg"><label>Nombre de la organización</label><input type="text" id="brand-org-name" placeholder="Nombre del club, agencia o empresa"></div>
 <div class="fg"><label>Tipo de organización</label><select id="brand-org-type"><option value="">Seleccionar…</option><option value="club">Club</option><option value="agencia">Agencia</option><option value="empresa">Empresa</option></select></div>
@@ -398,7 +396,9 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
 <div class="fg"><label>Escudo / Logo · URL</label><input type="url" id="brand-logo-url" placeholder="https://…"><div class="branding-upload"><button type="button" class="btn btn-acc" onclick="document.getElementById('brand-logo-file').click()">Elegir archivo</button><input type="file" id="brand-logo-file" accept="image/*" hidden><img id="brand-logo-preview" class="branding-preview" alt="Vista previa del logo"></div></div>
 <div class="fg"><label>Fondo institucional · URL</label><input type="url" id="brand-bg-url" placeholder="https://…"><div class="branding-upload"><button type="button" class="btn btn-acc" onclick="document.getElementById('brand-bg-file').click()">Elegir archivo</button><input type="file" id="brand-bg-file" accept="image/*" hidden><img id="brand-bg-preview" class="branding-preview" alt="Vista previa del fondo"></div></div>
 <div class="fg" style="grid-column:1/-1"><label>Intensidad del fondo: <strong id="brand-bg-value">55%</strong></label><input type="range" id="brand-bg-opacity" min="0" max="100" value="55"><span class="branding-note">Regula la opacidad de la imagen institucional detrás del contenido del informe.</span></div>
-</div></div>
+</div></div></div>
+
+<div class="wrap" id="reportContent">
 
 <!-- ══ LOGOS ══ -->
 <div class="sec-title">① Identidad del Informe</div>
@@ -1227,6 +1227,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(layer){layer.style.backgroundImage=bg?'url("'+bg.replace(/["\\]/g,'')+'")':'none';layer.style.opacity=String(opacity)}
   const logo=logoData||(validUrl($('brand-logo-url').value)?$('brand-logo-url').value:'');
   [['brand-logo-preview',logo],['brand-bg-preview',bg]].forEach(([id,src])=>{const el=$(id);if(src){el.src=src;el.style.display='block'}else{el.removeAttribute('src');el.style.display='none'}});
+  const reportLogo=$('prev-logo'),reportLogoPlaceholder=$('ph-logo');
+  if(reportLogo&&logo){reportLogo.src=logo;reportLogo.style.display='block';if(reportLogoPlaceholder)reportLogoPlaceholder.style.display='none'}
+  const orgField=$('org');if(orgField&&$('brand-org-name').value){orgField.value=$('brand-org-name').value;if(typeof autoSave==='function')autoSave()}
  }
  function save(){const d={};ids.forEach(id=>d[id]=$(id).value);d.logoData=logoData;d.backgroundData=backgroundData;try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){toast('La imagen supera el espacio disponible del navegador. Probá con una imagen más liviana.','err','⚠️')}apply()}
  function compress(file,max,quality){return new Promise((resolve,reject)=>{const rd=new FileReader();rd.onerror=reject;rd.onload=()=>{const im=new Image();im.onerror=reject;im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',quality))};im.src=rd.result};rd.readAsDataURL(file)})}
