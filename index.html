@@ -121,7 +121,7 @@ body{
 .branding-preview{max-width:100%;max-height:82px;object-fit:contain;border:1px solid var(--bdr);border-radius:6px;padding:5px;background:rgba(0,0,0,.18);display:none}
 .branding-note{font-size:11px;color:var(--txt3);line-height:1.5}
 #reportContent{position:relative;isolation:isolate}
-#reportContent>.report-background{position:absolute;inset:0;z-index:-1;pointer-events:none;background-position:center top;background-size:cover;background-repeat:no-repeat;opacity:.55}
+
 @media(max-width:680px){.branding-grid{grid-template-columns:1fr}}
 /* ═══ LOGOS ═══ */
 .logos-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -226,6 +226,8 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
 .fill-psi{background:linear-gradient(90deg,var(--gold),#cc9900)}
 
 /* ═══ PROFILE CARDS ═══ */
+.profiles-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.profiles-grid .pcard{margin:0;min-width:0}
 .pcard{background:var(--card);border:1px solid var(--bdr);border-radius:10px;
   overflow:hidden;margin-bottom:16px;transition:border-color .2s}
 .pcard:hover{border-color:var(--bdr2)}
@@ -255,25 +257,6 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
 .pt-tac{background:rgba(255,107,0,.12);color:var(--acc2)}
 .pt-fis{background:rgba(0,230,118,.12);color:var(--grn)}
 .pt-psi{background:rgba(255,214,0,.12);color:var(--gold)}
-
-/* ═══ RADAR CHART ═══ */
-.radar-wrap{
-  display:flex;flex-direction:column;align-items:center;
-  padding:16px 0 8px;
-}
-.radar-title{
-  font-family:'Barlow Condensed',sans-serif;
-  font-size:10px;font-weight:700;letter-spacing:3px;
-  text-transform:uppercase;color:var(--txt3);margin-bottom:16px;
-}
-#radarCanvas{max-width:340px;width:100%}
-.radar-legend{
-  display:flex;flex-wrap:wrap;justify-content:center;
-  gap:10px 20px;margin-top:14px;
-}
-.rl-item{display:flex;align-items:center;gap:6px;
-  font-size:11px;color:var(--txt2)}
-.rl-dot{width:10px;height:10px;border-radius:50%}
 
 /* ═══ STATS DISPLAY ═══ */
 .stats-row{
@@ -370,6 +353,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
   .logos-grid{grid-template-columns:1fr}
   .res-wrap{grid-template-columns:1fr;gap:10px}
   .stats-row{grid-template-columns:repeat(3,1fr)}
+  .profiles-grid{grid-template-columns:1fr}
   .topbar{padding:0 16px}
   .wrap{padding:20px 14px 80px}
 }
@@ -386,17 +370,6 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
     <button class="btn btn-org" onclick="exportPDF()">🖨 PDF</button>
   </div>
 </header>
-
-<div class="wrap" id="brandingConfig"><div class="sec-title">Configuración Institucional</div>
-<div class="branding-panel" id="brandingPanel"><div class="branding-grid">
-<div class="fg"><label>Nombre de la organización</label><input type="text" id="brand-org-name" placeholder="Nombre del club, agencia o empresa"></div>
-<div class="fg"><label>Tipo de organización</label><select id="brand-org-type"><option value="">Seleccionar…</option><option value="club">Club</option><option value="agencia">Agencia</option><option value="empresa">Empresa</option></select></div>
-<div class="fg"><label>Color principal</label><input type="color" id="brand-primary" value="#00c2ff"><span class="branding-note" id="brand-primary-code">#00C2FF</span></div>
-<div class="fg"><label>Color secundario</label><input type="color" id="brand-secondary" value="#ff6b00"><span class="branding-note" id="brand-secondary-code">#FF6B00</span></div>
-<div class="fg"><label>Escudo / Logo · URL</label><input type="url" id="brand-logo-url" placeholder="https://…"><div class="branding-upload"><button type="button" class="btn btn-acc" onclick="document.getElementById('brand-logo-file').click()">Elegir archivo</button><input type="file" id="brand-logo-file" accept="image/*" hidden><img id="brand-logo-preview" class="branding-preview" alt="Vista previa del logo"></div></div>
-<div class="fg"><label>Fondo institucional · URL</label><input type="url" id="brand-bg-url" placeholder="https://…"><div class="branding-upload"><button type="button" class="btn btn-acc" onclick="document.getElementById('brand-bg-file').click()">Elegir archivo</button><input type="file" id="brand-bg-file" accept="image/*" hidden><img id="brand-bg-preview" class="branding-preview" alt="Vista previa del fondo"></div></div>
-<div class="fg" style="grid-column:1/-1"><label>Intensidad del fondo: <strong id="brand-bg-value">55%</strong></label><input type="range" id="brand-bg-opacity" min="0" max="100" value="55"><span class="branding-note">Regula la opacidad de la imagen institucional detrás del contenido del informe.</span></div>
-</div></div></div>
 
 <div class="wrap" id="reportContent">
 
@@ -608,23 +581,9 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
   </div>
 </div>
 
-<!-- ══ RADAR ══ -->
-<div class="sec-title">⑤ Radar de Rendimiento</div>
-<div class="card">
-  <div class="radar-wrap">
-    <div class="radar-title">Análisis Visual — 4 Perfiles</div>
-    <canvas id="radarCanvas" width="340" height="340"></canvas>
-    <div class="radar-legend">
-      <div class="rl-item"><div class="rl-dot" style="background:var(--acc)"></div>Técnico</div>
-      <div class="rl-item"><div class="rl-dot" style="background:var(--acc2)"></div>Táctico</div>
-      <div class="rl-item"><div class="rl-dot" style="background:var(--grn)"></div>Físico</div>
-      <div class="rl-item"><div class="rl-dot" style="background:var(--gold)"></div>Psicológico</div>
-    </div>
-  </div>
-</div>
-
 <!-- ══ PERFILES ══ -->
-<div class="sec-title">⑥ Perfiles del Jugador</div>
+<div class="profiles-grid">
+<div class="sec-title">⑤ Perfiles del Jugador</div>
 
 <!-- TÉCNICO -->
 <div class="pcard" id="pc-tec">
@@ -749,9 +708,12 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
     </div>
   </div>
 </div>
+</div><!-- /profiles-grid -->
+
+
 
 <!-- ══ CONCLUSIÓN ══ -->
-<div class="sec-title">⑨ Conclusión del Scout</div>
+<div class="sec-title">⑧ Conclusión del Scout</div>
 <div class="card">
   <div class="fg" style="margin-bottom:16px">
     <label>Recomendación Final</label>
@@ -771,7 +733,7 @@ textarea{resize:vertical;min-height:100px;line-height:1.7}
 </div>
 
 <!-- ══ SCOUT ══ -->
-<div class="sec-title">⑩ Datos del Scout</div>
+<div class="sec-title">⑨ Datos del Scout</div>
 <div class="card">
   <div class="g3">
     <div class="fg"><label>Nombre del Scout</label>
@@ -806,101 +768,11 @@ function setR(p,v){
   document.getElementById(`rv-${p}`).textContent=v+'/5';
   document.getElementById(`rb-${p}`).style.width=(v*20)+'%';
   document.getElementById(`ptag-${p}`).textContent=rLabels[v];
-  drawRadar();
   autoSave();
 }
 
 /* ══════════════════════════════════════════
    RADAR CHART
-══════════════════════════════════════════ */
-function drawRadar(){
-  const c=document.getElementById('radarCanvas');
-  const ctx=c.getContext('2d');
-  const W=c.width,H=c.height;
-  const cx=W/2,cy=H/2,R=130;
-  ctx.clearRect(0,0,W,H);
-
-  const labels=['Técnico','Táctico','Físico','Psicológico'];
-  const colors=['#00c2ff','#ff6b00','#00e676','#ffd600'];
-  const vals=[ratings.tec,ratings.tac,ratings.fis,ratings.psi];
-  const angles=labels.map((_,i)=>(-Math.PI/2)+(2*Math.PI/4)*i);
-
-  // Grid levels
-  for(let lvl=1;lvl<=5;lvl++){
-    ctx.beginPath();
-    angles.forEach((a,i)=>{
-      const r=(R/5)*lvl;
-      const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
-      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-    });
-    ctx.closePath();
-    ctx.strokeStyle='rgba(255,255,255,0.06)';
-    ctx.lineWidth=1;
-    ctx.stroke();
-  }
-
-  // Axis lines
-  angles.forEach(a=>{
-    ctx.beginPath();
-    ctx.moveTo(cx,cy);
-    ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));
-    ctx.strokeStyle='rgba(255,255,255,0.08)';
-    ctx.lineWidth=1;
-    ctx.stroke();
-  });
-
-  // Data polygon
-  ctx.beginPath();
-  angles.forEach((a,i)=>{
-    const r=(R/5)*Math.max(vals[i],0.1);
-    const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
-    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-  });
-  ctx.closePath();
-  ctx.fillStyle='rgba(0,194,255,0.12)';
-  ctx.fill();
-  ctx.strokeStyle='rgba(0,194,255,0.6)';
-  ctx.lineWidth=2;
-  ctx.stroke();
-
-  // Dots per axis with color
-  angles.forEach((a,i)=>{
-    const r=(R/5)*Math.max(vals[i],0.1);
-    const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);
-    ctx.beginPath();
-    ctx.arc(x,y,5,0,Math.PI*2);
-    ctx.fillStyle=colors[i];
-    ctx.fill();
-    ctx.strokeStyle='#090d13';
-    ctx.lineWidth=2;
-    ctx.stroke();
-  });
-
-  // Labels
-  ctx.font='bold 13px Barlow Condensed, sans-serif';
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
-  angles.forEach((a,i)=>{
-    const offset=18;
-    const x=cx+(R+offset)*Math.cos(a);
-    const y=cy+(R+offset)*Math.sin(a);
-    ctx.fillStyle=colors[i];
-    ctx.fillText(labels[i],x,y);
-    ctx.font='bold 11px Barlow Condensed, sans-serif';
-    ctx.fillStyle='rgba(255,255,255,0.5)';
-    ctx.fillText(vals[i]>0?vals[i]+'/5':'—',x,y+15);
-    ctx.font='bold 13px Barlow Condensed, sans-serif';
-  });
-
-  // Center
-  ctx.beginPath();
-  ctx.arc(cx,cy,4,0,Math.PI*2);
-  ctx.fillStyle='rgba(255,255,255,0.2)';
-  ctx.fill();
-}
-
-/* ══════════════════════════════════════════
-   STATS DISPLAY
 ══════════════════════════════════════════ */
 function updateStats(){
   const ids={min:'minutos',gol:'goles',asi:'asistencias',due:'duelos',pro:'promedio',xg:'xg',xa:'xa'};
@@ -1134,7 +1006,6 @@ function clearAll(){
     document.getElementById(id).style.display='';
   });
   document.getElementById('ov-foto').style.display='none';
-  drawRadar();
   // Reset r1a r1b r2a r2b to 0
   ['r1a','r1b','r2a','r2b'].forEach(id=>{
     document.getElementById(id).value='0';
@@ -1160,8 +1031,6 @@ function toast(msg,type='ok',ico='✅'){
 ══════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded',()=>{
   loadSaved();
-  drawRadar();
-
   // Auto-save on any input change
   document.querySelectorAll('input,select,textarea').forEach(el=>{
     el.addEventListener('change',autoSave);
@@ -1214,33 +1083,6 @@ window.addEventListener('DOMContentLoaded',()=>{
 })();
 </script>
 
-<script id="institutional-branding">
-(function(){
- const KEY='scout_report_branding_v1',ids=['brand-org-name','brand-org-type','brand-primary','brand-secondary','brand-logo-url','brand-bg-url','brand-bg-opacity'];
- const $=id=>document.getElementById(id);let logoData='',backgroundData='';
- function validUrl(s){try{return ['http:','https:'].includes(new URL(s).protocol)}catch(e){return false}}
- function apply(){
-  const primary=$('brand-primary').value,secondary=$('brand-secondary').value,opacity=Number($('brand-bg-opacity').value)/100;
-  document.documentElement.style.setProperty('--acc',primary);document.documentElement.style.setProperty('--acc2',secondary);
-  $('brand-primary-code').textContent=primary.toUpperCase();$('brand-secondary-code').textContent=secondary.toUpperCase();$('brand-bg-value').textContent=Math.round(opacity*100)+'%';
-  const bg=backgroundData||(validUrl($('brand-bg-url').value)?$('brand-bg-url').value:'');const layer=$('report-background-layer');
-  if(layer){layer.style.backgroundImage=bg?'url("'+bg.replace(/["\\]/g,'')+'")':'none';layer.style.opacity=String(opacity)}
-  const logo=logoData||(validUrl($('brand-logo-url').value)?$('brand-logo-url').value:'');
-  [['brand-logo-preview',logo],['brand-bg-preview',bg]].forEach(([id,src])=>{const el=$(id);if(src){el.src=src;el.style.display='block'}else{el.removeAttribute('src');el.style.display='none'}});
-  const reportLogo=$('prev-logo'),reportLogoPlaceholder=$('ph-logo');
-  if(reportLogo&&logo){reportLogo.src=logo;reportLogo.style.display='block';if(reportLogoPlaceholder)reportLogoPlaceholder.style.display='none'}
-  const orgField=$('org');if(orgField&&$('brand-org-name').value){orgField.value=$('brand-org-name').value;if(typeof autoSave==='function')autoSave()}
- }
- function save(){const d={};ids.forEach(id=>d[id]=$(id).value);d.logoData=logoData;d.backgroundData=backgroundData;try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){toast('La imagen supera el espacio disponible del navegador. Probá con una imagen más liviana.','err','⚠️')}apply()}
- function compress(file,max,quality){return new Promise((resolve,reject)=>{const rd=new FileReader();rd.onerror=reject;rd.onload=()=>{const im=new Image();im.onerror=reject;im.onload=()=>{const s=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*s));c.height=Math.max(1,Math.round(im.height*s));c.getContext('2d').drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',quality))};im.src=rd.result};rd.readAsDataURL(file)})}
- ids.forEach(id=>$(id).addEventListener('input',save));
- $('brand-logo-file').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{logoData=await compress(f,800,.82);$('brand-logo-url').value='';save()}catch(_){toast('No se pudo cargar el logo.','err','⚠️')}});
- $('brand-bg-file').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{backgroundData=await compress(f,1800,.78);$('brand-bg-url').value='';save()}catch(_){toast('No se pudo cargar el fondo.','err','⚠️')}});
- $('brand-logo-url').addEventListener('change',()=>{logoData='';save()});$('brand-bg-url').addEventListener('change',()=>{backgroundData='';save()});
- const layer=document.createElement('div');layer.className='report-background';layer.id='report-background-layer';$('reportContent').prepend(layer);
- function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||'{}');ids.forEach(id=>{if(d[id]!==undefined)$(id).value=d[id]});logoData=d.logoData||'';backgroundData=d.backgroundData||''}catch(_){}apply()}
- if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',load);else load();
-})();
 </script>
 </body>
 </html>
