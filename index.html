@@ -1072,8 +1072,24 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(typeof updateStats==='function')updateStats();
   toast('Datos recibidos desde SCOUTPRO · Revisá y guardá el informe','info','↗');
  }
+ const nombreInput=document.getElementById('nombre');
+ let photoLookupTimer=null;
+ if(nombreInput)nombreInput.addEventListener('input',()=>{
+  clearTimeout(photoLookupTimer);
+  const img=document.getElementById('prev-foto'),ph=document.getElementById('ph-foto');
+  if(img){img.removeAttribute('src');img.style.display='none'}if(ph)ph.style.display='';
+  photoLookupTimer=setTimeout(()=>{
+   const name=nombreInput.value.trim();if(!name||window.parent===window)return;
+   window.parent.postMessage({type:'scoutpro-report:lookup-player-photo',name,club:document.getElementById('club')?.value||''},ORIGIN);
+  },350);
+ });
  window.addEventListener('message',ev=>{
-  if(ev.origin!==ORIGIN||ev.source!==window.parent||!ev.data||ev.data.type!=='scoutpro-report:fill-external-bruto'||ev.data.module!=='scoutpro')return;
+  if(ev.origin!==ORIGIN||ev.source!==window.parent||!ev.data)return;
+  if(ev.data.type==='scoutpro-report:player-photo-result'){
+   if(nombreInput&&nombreInput.value.trim()===ev.data.name&&ev.data.photo)setImage('prev-foto','ph-foto',ev.data.photo,'ov-foto');
+   return;
+  }
+  if(ev.data.type!=='scoutpro-report:fill-external-bruto'||ev.data.module!=='scoutpro')return;
   const payload=ev.data.payload||{};
   const incoming=payload.player&&payload.player.nombre||payload.record&&payload.record.jugador||'el jugador';
   const hasExisting=['nombre','club','obs-tec','obs-tac','obs-fis','obs-psi','notas'].some(id=>v(id).trim());if(hasExisting&&!window.confirm('El Informe Bruto tiene datos cargados. ¿Reemplazarlos con el informe de '+incoming+'?'))return;
