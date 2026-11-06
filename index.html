@@ -1074,8 +1074,16 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(typeof updateStats==='function')updateStats();
   toast('Datos recibidos desde SCOUTPRO · Revisá y guardá el informe','info','↗');
  }
+ function clearFormData(){
+  document.querySelectorAll('input:not([type=radio]):not([type=checkbox]),textarea,select').forEach(el=>{if(el.type==='file')return;el.value='';el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))});
+  document.querySelectorAll('input[type=radio]').forEach(el=>el.checked=false);
+  ['tec','tac','fis','psi'].forEach(key=>setR(key,0));
+  [['prev-foto','ph-foto','ov-foto'],['prev-escudo','ph-escudo',null],['prev-logo','ph-logo',null]].forEach(([imgId,phId,ovId])=>{const img=document.getElementById(imgId),ph=document.getElementById(phId),ov=ovId&&document.getElementById(ovId);if(img){img.removeAttribute('src');img.style.display='none'}if(ph)ph.style.display='';if(ov)ov.style.display='none'});
+  updateStats();try{localStorage.removeItem(STORE_KEY)}catch(e){}
+ }
  function applyStoredData(d){
   if(!d||typeof d!=='object')return;
+  clearFormData();
   Object.entries(d).forEach(([key,value])=>{if(key==='ratings'||key==='images'||['tiempo','campo','decision'].includes(key)||value==null||typeof value==='object')return;const el=document.getElementById(key);if(el){el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}});
   ['tec','tac','fis','psi'].forEach(key=>setR(key,0));
   if(d.ratings)Object.entries(d.ratings).forEach(([key,value])=>{if(['tec','tac','fis','psi'].includes(key))setR(key,+value||0)});
@@ -1105,6 +1113,9 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
   if(ev.data.type==='scoutpro-report:restore-external-bruto'){
    applyStoredData(ev.data.data||{});return;
+  }
+  if(ev.data.type==='scoutpro-report:clear-external-bruto'){
+   clearFormData();return;
   }
   if(ev.data.type!=='scoutpro-report:fill-external-bruto'||ev.data.module!=='scoutpro')return;
   const payload=ev.data.payload||{};
