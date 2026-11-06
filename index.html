@@ -1076,10 +1076,11 @@ window.addEventListener('DOMContentLoaded',()=>{
  }
  function applyStoredData(d){
   if(!d||typeof d!=='object')return;
-  Object.entries(d).forEach(([key,value])=>{if(key==='ratings'||key==='images'||['tiempo','campo','decision'].includes(key)||value==null||typeof value==='object')return;setField(key,value)});
-  if(d.ratings)Object.entries(d.ratings).forEach(([key,value])=>{if(value>0&&['tec','tac','fis','psi'].includes(key))setR(key,value)});
-  ['tiempo','campo','decision'].forEach(name=>{if(!d[name])return;const option=Array.from(document.querySelectorAll('input[name="'+name+'"]')).find(el=>(el.nextElementSibling?.textContent||'').trim()===d[name]);if(option)option.checked=true});
-  if(d.images){setImage('prev-foto','ph-foto',d.images.foto,'ov-foto');setImage('prev-escudo','ph-escudo',d.images.escudo);setImage('prev-logo','ph-logo',d.images.logo)}
+  Object.entries(d).forEach(([key,value])=>{if(key==='ratings'||key==='images'||['tiempo','campo','decision'].includes(key)||value==null||typeof value==='object')return;const el=document.getElementById(key);if(el){el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}))}});
+  ['tec','tac','fis','psi'].forEach(key=>setR(key,0));
+  if(d.ratings)Object.entries(d.ratings).forEach(([key,value])=>{if(['tec','tac','fis','psi'].includes(key))setR(key,+value||0)});
+  ['tiempo','campo','decision'].forEach(name=>{const options=Array.from(document.querySelectorAll('input[name="'+name+'"]'));options.forEach(el=>el.checked=false);if(!d[name])return;const option=options.find(el=>(el.nextElementSibling?.textContent||'').trim()===d[name]);if(option)option.checked=true});
+  [['foto','prev-foto','ph-foto','ov-foto'],['escudo','prev-escudo','ph-escudo',null],['logo','prev-logo','ph-logo',null]].forEach(([key,imgId,placeholderId,overlayId])=>{const src=d.images&&d.images[key]||'',img=document.getElementById(imgId),ph=document.getElementById(placeholderId),ov=overlayId&&document.getElementById(overlayId);if(src)setImage(imgId,placeholderId,src,overlayId);else{if(img){img.removeAttribute('src');img.style.display='none'}if(ph)ph.style.display='';if(ov)ov.style.display='none'}});
   autoSave();updateStats();
  }
  const nombreInput=document.getElementById('nombre');
