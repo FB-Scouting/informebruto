@@ -852,6 +852,7 @@ function getFormData(){
     'obs-redes':v('obs-redes'),
     ratings:{...ratings},
     tiempo:getRadio('tiempo'),campo:getRadio('campo'),decision:getRadio('decision'),
+    images:{foto:document.getElementById('prev-foto')?.src||'',escudo:document.getElementById('prev-escudo')?.src||'',logo:document.getElementById('prev-logo')?.src||''},
   };
 }
 
@@ -1073,6 +1074,14 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(typeof updateStats==='function')updateStats();
   toast('Datos recibidos desde SCOUTPRO · Revisá y guardá el informe','info','↗');
  }
+ function applyStoredData(d){
+  if(!d||typeof d!=='object')return;
+  Object.entries(d).forEach(([key,value])=>{if(key==='ratings'||key==='images'||['tiempo','campo','decision'].includes(key)||value==null||typeof value==='object')return;setField(key,value)});
+  if(d.ratings)Object.entries(d.ratings).forEach(([key,value])=>{if(value>0&&['tec','tac','fis','psi'].includes(key))setR(key,value)});
+  ['tiempo','campo','decision'].forEach(name=>{if(!d[name])return;const option=Array.from(document.querySelectorAll('input[name="'+name+'"]')).find(el=>(el.nextElementSibling?.textContent||'').trim()===d[name]);if(option)option.checked=true});
+  if(d.images){setImage('prev-foto','ph-foto',d.images.foto,'ov-foto');setImage('prev-escudo','ph-escudo',d.images.escudo);setImage('prev-logo','ph-logo',d.images.logo)}
+  autoSave();updateStats();
+ }
  const nombreInput=document.getElementById('nombre');
  let photoLookupTimer=null;
  if(nombreInput)nombreInput.addEventListener('input',()=>{
@@ -1089,6 +1098,12 @@ window.addEventListener('DOMContentLoaded',()=>{
   if(ev.data.type==='scoutpro-report:player-photo-result'){
    if(nombreInput&&nombreInput.value.trim()===ev.data.name&&ev.data.photo)setImage('prev-foto','ph-foto',ev.data.photo,'ov-foto');
    return;
+  }
+  if(ev.data.type==='scoutpro-report:collect-external-bruto'){
+   window.parent.postMessage({type:'scoutpro-report:external-bruto-data',data:getFormData()},ORIGIN);return;
+  }
+  if(ev.data.type==='scoutpro-report:restore-external-bruto'){
+   applyStoredData(ev.data.data||{});return;
   }
   if(ev.data.type!=='scoutpro-report:fill-external-bruto'||ev.data.module!=='scoutpro')return;
   const payload=ev.data.payload||{};
